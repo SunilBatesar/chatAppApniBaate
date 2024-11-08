@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:recipe_test/Components/Buttons/primary_button.dart';
 import 'package:recipe_test/Components/TextFields/primary_text_form_field.dart';
 import 'package:recipe_test/Controllers/user_controller.dart';
+import 'package:recipe_test/Services/appconfig.dart';
 import 'package:recipe_test/Utils/app_validators.dart';
 import 'package:recipe_test/Utils/routes/routes_name.dart';
 import 'package:recipe_test/main.dart';
@@ -27,11 +28,9 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Image.asset(
-                  //   constantSheet.images.loginuser,
-                  //   height: 200.sp,
-                  //   width: 200.sp,
-                  // ),
+                  Text(AppConfig.appName,
+                      style: constantSheet.textTheme.fs35Medium
+                          .copyWith(color: constantSheet.colors.primary)),
                   Gap(25.h),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -42,7 +41,7 @@ class LoginScreen extends StatelessWidget {
                           TextSpan(
                               text: "Welcome back!",
                               style: TextStyle(
-                                  color: constantSheet.colors.primary))
+                                  color: constantSheet.colors.yellowlight))
                         ])),
                   ),
                   Gap(25.h),

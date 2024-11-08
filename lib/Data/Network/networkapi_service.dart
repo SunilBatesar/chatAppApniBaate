@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recipe_test/Data/Network/baseapi_service.dart';
@@ -10,8 +9,8 @@ class NetworkapiService extends BaseapiService {
   @override
   Future authenticate(
       {required AuthState state, Map<String, dynamic>? json}) async {
-    String email = json!["email"] ?? "";
-    String password = json["password"] ?? "";
+    String email = json != null ? json["email"] : "";
+    String password = json != null ? json["password"] : "";
     try {
       if (state == AuthState.SIGNUP) {
         UserCredential usercredential = await _auth
@@ -24,7 +23,7 @@ class NetworkapiService extends BaseapiService {
       } else if (state == AuthState.LOGOUT) {
         await _auth.signOut();
       }
-    }  catch (e) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -72,8 +71,6 @@ class NetworkapiService extends BaseapiService {
     }
   }
 }
-
-
 
 // GET DATA FROM COLLECTION
 Future<List<FirebaseResponseModel>> getDataCollectionRef(

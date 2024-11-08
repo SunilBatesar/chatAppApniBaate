@@ -40,4 +40,6 @@ class AppTextTheme {
       GoogleFonts.poppins(fontSize: 20.sp, fontWeight: FontWeight.w500);
   TextStyle fs24Medium =
       GoogleFonts.poppins(fontSize: 24.sp, fontWeight: FontWeight.w500);
+  TextStyle fs35Medium =
+      GoogleFonts.poppins(fontSize: 35.sp, fontWeight: FontWeight.w500);
 }

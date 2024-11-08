@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:recipe_test/Data/Network/networkapi_service.dart';
@@ -11,7 +12,8 @@ class UserController extends GetxController {
   final _service = NetworkapiService();
   dynamic _userdata;
   UserModel get userdata => _userdata;
-
+  List<UserModel> _friendsdata = [];
+  List<UserModel> get friendsdata => _friendsdata;
   Future<void> getDataUser(String id) async {
     try {
       final response = await _service.get(constantSheet.apis.userDocument(id))
@@ -62,6 +64,7 @@ class UserController extends GetxController {
         await prefs.setSharedPrefs(prefs.userKey,
             snapshot.first.docId); // SET USER ID SharedPreferences
         _userdata = data; // SET DATA
+        await getFriendsData();
         Get.offNamed(RouteName.homeScreen); // NEXT SCREEN
       }
     } catch (e) {
@@ -73,7 +76,6 @@ class UserController extends GetxController {
 
   // LOGOUT
   Future<void> logout() async {
-    print(prefs.getSharedPrefs(prefs.userKey));
     try {
       await _service.authenticate(state: AuthState.LOGOUT);
 
@@ -81,6 +83,60 @@ class UserController extends GetxController {
       Get.offAllNamed(RouteName.loginScreen);
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  Future searchuser(String value) async {
+    try {
+      final response = await _service.get(constantSheet.apis.userReference
+          .where("userName", isEqualTo: value)) as List<FirebaseResponseModel>;
+      if (response.isNotEmpty) {
+        return UserModel.fromjson(response[0]);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future addChateRoomId(String userId, String chatRoomID) async {
+    try {
+      await _service.update(constantSheet.apis.userDocument(userId), {
+        "chatRoomIds": FieldValue.arrayUnion([chatRoomID])
+      });
+      if (userId == (_userdata as UserModel).id) {
+        bool value =
+            (_userdata as UserModel).chatRoomIds!.any((e) => e == chatRoomID);
+        if (!value) {
+          (_userdata as UserModel).chatRoomIds!.add(chatRoomID);
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      update();
+    }
+  }
+
+  Future<void> getFriendsData() async {
+    try {
+      _friendsdata = [];
+      List<String> friendIds = [];
+      for (var element in (_userdata as UserModel).chatRoomIds!) {
+        final id = element.split("-");
+        id.removeWhere((e) => e == (_userdata as UserModel).id);
+        if (id.isNotEmpty) {
+          friendIds.add(id[0]);
+        }
+      }
+      for (var id in friendIds) {
+        final response = await _service.get(constantSheet.apis.userDocument(id))
+            as FirebaseResponseModel;
+        _friendsdata.add(UserModel.fromjson(response));
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      update();
     }
   }
 }

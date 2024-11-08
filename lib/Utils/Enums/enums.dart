@@ -3,3 +3,4 @@
 /// AUTH STATE
 enum AuthState { LOGIN, SIGNUP, LOGOUT }
 
+enum ChatTypes { MESSAGE, VIDEO, AUDIO, IMAGE, DOC }

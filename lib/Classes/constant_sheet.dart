@@ -1,4 +1,5 @@
 import 'package:recipe_test/Res/Apis/apis.dart';
+import 'package:recipe_test/Services/app_services.dart';
 import 'package:recipe_test/components/Constants/style_sheet.dart';
 
 class ConstantSheet {
@@ -11,4 +12,5 @@ class ConstantSheet {
   AppColors get colors => AppColors();
   AppTextTheme get textTheme => AppTextTheme();
   Apis get apis => Apis();
+  AppServices get services => AppServices();
 }

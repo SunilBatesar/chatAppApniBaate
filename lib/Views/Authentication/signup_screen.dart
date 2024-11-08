@@ -6,12 +6,14 @@ import 'package:recipe_test/Components/Buttons/primary_button.dart';
 import 'package:recipe_test/Components/TextFields/primary_text_form_field.dart';
 import 'package:recipe_test/Controllers/user_controller.dart';
 import 'package:recipe_test/Models/user_model.dart';
+import 'package:recipe_test/Services/appconfig.dart';
 import 'package:recipe_test/Utils/app_validators.dart';
 import 'package:recipe_test/Utils/routes/routes_name.dart';
 import 'package:recipe_test/main.dart';
 
 class SignupScreen extends StatelessWidget {
   SignupScreen({super.key});
+  final _usernameController = TextEditingController();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -29,23 +31,18 @@ class SignupScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Image.asset(
-                  //   constantSheet.images.singUpuser,
-                  //   height: 200.sp,
-                  //   width: 200.sp,
-                  //   fit: BoxFit.cover,
-                  // ),
                   Gap(20.h),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text.rich(TextSpan(
                         text: "Sign up to",
-                        style: constantSheet.textTheme.fs24Medium,
+                        style: constantSheet.textTheme.fs20Medium,
                         children: <TextSpan>[
                           TextSpan(
-                              text: " Apni Baate",
-                              style: TextStyle(
-                                  color: constantSheet.colors.primary))
+                              text: " ${AppConfig.appName}",
+                              style: constantSheet.textTheme.fs24Medium
+                                  .copyWith(
+                                      color: constantSheet.colors.primary))
                         ])),
                   ),
                   Gap(5.h),
@@ -65,6 +62,12 @@ class SignupScreen extends StatelessWidget {
                           PrimaryTextFormField(
                             hinttext: "Name",
                             controller: _nameController,
+                            validator: TextValidator(),
+                          ),
+                          Gap(18.h),
+                          PrimaryTextFormField(
+                            hinttext: "User Name",
+                            controller: _usernameController,
                             validator: TextValidator(),
                           ),
                           Gap(18.h),
@@ -126,7 +129,9 @@ class SignupScreen extends StatelessWidget {
     final userController = Get.find<UserController>();
     if (_key.currentState!.validate()) {
       final user = UserModel(
-              name: _nameController.text, email: _emailController.text.trim())
+              userName: _usernameController.text.trim(),
+              name: _nameController.text,
+              email: _emailController.text.trim())
           .tomap();
       await userController.signup({
         "user": user,
