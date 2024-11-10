@@ -4,6 +4,7 @@ class UserModel {
   String? id, name, email;
   String? userName;
   bool? status;
+  DateTime? inactiveTime;
   List<String>? chatRoomIds;
   UserModel({
     this.id,
@@ -11,6 +12,7 @@ class UserModel {
     this.email,
     this.status,
     this.userName,
+    this.inactiveTime,
     this.chatRoomIds,
   });
 
@@ -20,6 +22,7 @@ class UserModel {
     String? email,
     String? userName,
     bool? status,
+    DateTime? inactiveTime,
     List<String>? chatRoomIds,
   }) {
     return UserModel(
@@ -27,6 +30,7 @@ class UserModel {
       name: name ?? this.name,
       email: email ?? this.email,
       status: status ?? this.status,
+      inactiveTime: inactiveTime ?? this.inactiveTime,
       userName: userName ?? this.userName,
       chatRoomIds: chatRoomIds ?? this.chatRoomIds,
     );
@@ -38,6 +42,7 @@ class UserModel {
       "name": name ?? "",
       "userName": userName ?? "",
       "status": status ?? true,
+      "inactiveTime": inactiveTime.toString(),
       "chatRoomIds": chatRoomIds ?? [],
     };
   }
@@ -48,6 +53,8 @@ class UserModel {
         userName = json.data["userName"] ?? "",
         email = json.data["email"] ?? "",
         status = json.data["status"] ?? false,
+        inactiveTime = DateTime.parse(
+            (json.data["inactiveTime"]) ?? "2024-11-09 21:12:11.927887"),
         chatRoomIds = ((json.data["chatRoomIds"] ?? []) as List)
             .map((e) => e.toString())
             .toList();

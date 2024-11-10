@@ -72,12 +72,15 @@ class LoginScreen extends StatelessWidget {
                         ],
                       )),
                   Gap(45.h),
-                  PrimaryButton(
-                    title: "Login",
-                    isExpanded: true,
-                    onPressed: () {
-                      _getValideTextField();
-                    },
+                  GetBuilder<UserController>(
+                    builder: (controller) => PrimaryButton(
+                      title: "Login",
+                      isExpanded: true,
+                      isloading: controller.loading,
+                      onPressed: () {
+                        _getValideTextField();
+                      },
+                    ),
                   ),
                   Gap(50.h),
                   GestureDetector(

@@ -6,14 +6,24 @@ import 'package:recipe_test/Models/firebase_response_model.dart';
 import 'package:recipe_test/Models/user_model.dart';
 import 'package:recipe_test/Utils/Enums/enums.dart';
 import 'package:recipe_test/Utils/routes/routes_name.dart';
+import 'package:recipe_test/Utils/utils.dart';
 import 'package:recipe_test/main.dart';
 
 class UserController extends GetxController {
   final _service = NetworkapiService();
+
+  bool _loading = false;
+  bool get loading => _loading;
+  setloading(bool value) {
+    _loading = value;
+    update();
+  }
+
   dynamic _userdata;
   UserModel get userdata => _userdata;
-  List<UserModel> _friendsdata = [];
-  List<UserModel> get friendsdata => _friendsdata;
+  final List<String> _friendsID = [];
+  List<String> get friendsID => _friendsID;
+
   Future<void> getDataUser(String id) async {
     try {
       final response = await _service.get(constantSheet.apis.userDocument(id))
@@ -26,29 +36,57 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> signup(Map<String, dynamic> jsondata) async {
-    final uData =
-        UserModel.fromjson(FirebaseResponseModel(jsondata["user"], ""));
+  Future<void> updateUserStatus(bool value, DateTime time) async {
     try {
-      UserCredential userCredential = await _service.authenticate(
-              state: AuthState.SIGNUP,
-              json: {"email": uData.email, "password": jsondata["password"]})
-          as UserCredential;
-      var id = userCredential.user!.uid;
-      if (id.isNotEmpty) {
-        await _service.post(constantSheet.apis.userDocument(id), uData.tomap());
-        await prefs.setSharedPrefs(prefs.userKey, id);
-        _userdata = uData.copyWith(id: id);
-        Get.offNamed(RouteName.homeScreen); // NEXT SCREEN
+      _userdata != null
+          ? await _service.update(
+              constantSheet.apis.userDocument((_userdata as UserModel).id!), {
+              "status": value,
+              "inactiveTime": time.toString(),
+            }).whenComplete(
+              () {
+                (_userdata as UserModel).status = value;
+              },
+            )
+          : null;
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> signup(Map<String, dynamic> jsondata) async {
+    setloading(true);
+    try {
+      final uData =
+          UserModel.fromjson(FirebaseResponseModel(jsondata["user"], ""));
+      final checkusername = await searchuser(uData.userName!);
+      if (checkusername.isEmpty) {
+        UserCredential userCredential = await _service.authenticate(
+                state: AuthState.SIGNUP,
+                json: {"email": uData.email, "password": jsondata["password"]})
+            as UserCredential;
+        var id = userCredential.user!.uid;
+        if (id.isNotEmpty) {
+          await _service.post(
+              constantSheet.apis.userDocument(id), uData.tomap());
+          await prefs.setSharedPrefs(prefs.userKey, id);
+          _userdata = uData.copyWith(id: id);
+          Get.offNamed(RouteName.homeScreen); // NEXT SCREEN
+        }
+      } else {
+        AppUtils.messageSnakeBar(
+            "Please", "change UserName beacuse this UserName is alreday used");
       }
     } catch (e) {
       print(e.toString());
     } finally {
       update();
+      setloading(false);
     }
   }
 
   Future<void> login(Map<String, dynamic> json) async {
+    setloading(true);
     String email = json["email"];
     String password = json["password"];
     try {
@@ -64,38 +102,47 @@ class UserController extends GetxController {
         await prefs.setSharedPrefs(prefs.userKey,
             snapshot.first.docId); // SET USER ID SharedPreferences
         _userdata = data; // SET DATA
-        await getFriendsData();
+        await updateUserStatus(true, DateTime.now());
         Get.offNamed(RouteName.homeScreen); // NEXT SCREEN
       }
     } catch (e) {
       print(e.toString());
     } finally {
       update();
+      setloading(false);
     }
   }
 
   // LOGOUT
   Future<void> logout() async {
+    setloading(true);
     try {
       await _service.authenticate(state: AuthState.LOGOUT);
-
       prefs.removSharedPrefs(prefs.userKey);
+      await updateUserStatus(false, DateTime.now());
+      _userdata = null;
       Get.offAllNamed(RouteName.loginScreen);
     } catch (e) {
       print(e.toString());
+    } finally {
+      update();
+      setloading(false);
     }
   }
 
-  Future searchuser(String value) async {
+  Future<String> searchuser(String value) async {
+    String id = "";
     try {
       final response = await _service.get(constantSheet.apis.userReference
           .where("userName", isEqualTo: value)) as List<FirebaseResponseModel>;
       if (response.isNotEmpty) {
-        return UserModel.fromjson(response[0]);
+        final db = UserModel.fromjson(response[0]);
+        id = db.id!;
       }
     } catch (e) {
       print(e.toString());
     }
+    return id;
   }
 
   Future addChateRoomId(String userId, String chatRoomID) async {
@@ -109,29 +156,6 @@ class UserController extends GetxController {
         if (!value) {
           (_userdata as UserModel).chatRoomIds!.add(chatRoomID);
         }
-      }
-    } catch (e) {
-      print(e.toString());
-    } finally {
-      update();
-    }
-  }
-
-  Future<void> getFriendsData() async {
-    try {
-      _friendsdata = [];
-      List<String> friendIds = [];
-      for (var element in (_userdata as UserModel).chatRoomIds!) {
-        final id = element.split("-");
-        id.removeWhere((e) => e == (_userdata as UserModel).id);
-        if (id.isNotEmpty) {
-          friendIds.add(id[0]);
-        }
-      }
-      for (var id in friendIds) {
-        final response = await _service.get(constantSheet.apis.userDocument(id))
-            as FirebaseResponseModel;
-        _friendsdata.add(UserModel.fromjson(response));
       }
     } catch (e) {
       print(e.toString());

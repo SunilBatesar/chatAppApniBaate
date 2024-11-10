@@ -94,12 +94,15 @@ class SignupScreen extends StatelessWidget {
                         ],
                       )),
                   Gap(45.h),
-                  PrimaryButton(
-                    title: "Sign Up",
-                    isExpanded: true,
-                    onPressed: () async {
-                      await _getValideTextField();
-                    },
+                  GetBuilder<UserController>(
+                    builder: (controller) => PrimaryButton(
+                      title: "Sign Up",
+                      isExpanded: true,
+                      isloading: controller.loading,
+                      onPressed: () async {
+                        await _getValideTextField();
+                      },
+                    ),
                   ),
                   Gap(25.h),
                   GestureDetector(
@@ -129,10 +132,12 @@ class SignupScreen extends StatelessWidget {
     final userController = Get.find<UserController>();
     if (_key.currentState!.validate()) {
       final user = UserModel(
-              userName: _usernameController.text.trim(),
-              name: _nameController.text,
-              email: _emailController.text.trim())
-          .tomap();
+        userName: _usernameController.text.trim(),
+        name: _nameController.text,
+        email: _emailController.text.trim(),
+        inactiveTime: DateTime.now(),
+        status: true,
+      ).tomap();
       await userController.signup({
         "user": user,
         "password": _passwordController.text.trim(),

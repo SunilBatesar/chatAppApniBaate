@@ -10,6 +10,7 @@ import 'package:recipe_test/Data/Functions/functions.dart';
 import 'package:recipe_test/Models/chat_model.dart';
 import 'package:recipe_test/Models/user_model.dart';
 import 'package:recipe_test/Utils/Enums/enums.dart';
+import 'package:recipe_test/Views/Chat/Widgets/chat_ui.dart';
 import 'package:recipe_test/main.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -57,12 +58,8 @@ class _ChatScreenState extends State<ChatScreen> {
               child: FirebaseAnimatedList(
                 query: FirebaseDatabase.instance.ref("chats").child(chatroom),
                 itemBuilder: (context, snapshot, animation, index) {
-                  print("=================");
-                  print(snapshot.key);
-                  print("=================");
                   final data = ChatModel.fromejson(
                       snapshot.value! as Map<Object?, Object?>, snapshot.key!);
-                  // return Text(snapshot.value.toString());
                   if (widget.model.id == data.senderid) {
                     return Align(
                         alignment: Alignment.centerLeft,
@@ -83,36 +80,26 @@ class _ChatScreenState extends State<ChatScreen> {
       bottomNavigationBar: MessageTextfield(
         controller: messageFieldcontroller,
         onFieldSubmitted: () async {
-          final userController = Get.find<UserController>();
-          final chat = ChatModel(
-            senderid: userController.userdata.id,
-            data: messageFieldcontroller.text,
-            typevalue: ChatTypes.MESSAGE,
-          );
-          if (chat.data == null || chat.data!.isNotEmpty) {
-            await ChatsController().setChat(widget.model.id!, chat);
-            messageFieldcontroller.clear();
-          }
+          await chatHandleFunction();
         },
       ),
     );
   }
-}
 
-Widget chatUi(ChatTypes type, String value) {
-  switch (type) {
-    case ChatTypes.MESSAGE:
-      return Container(
-        padding: EdgeInsets.all(10.sp),
-        decoration: BoxDecoration(
-          color: constantSheet.colors.yellowlight,
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        child: Text(value,
-            style: constantSheet.textTheme.fs16Normal
-                .copyWith(color: constantSheet.colors.black)),
-      );
-    default:
-      return const SizedBox();
+  Future<void> chatHandleFunction() async {
+    final userController = Get.find<UserController>();
+    final chat = ChatModel(
+      senderid: userController.userdata.id,
+      data: messageFieldcontroller.text,
+      typevalue: ChatTypes.MESSAGE,
+    );
+    final String chatRoomId =
+        AppFunctions.chatRoomId(userController.userdata.id!, widget.model.id!);
+    bool chatbool =
+        widget.model.chatRoomIds!.any((element) => element == chatRoomId);
+    if (chat.data == null || chat.data!.isNotEmpty) {
+      await ChatsController().setChat(chatRoomId, chat, chatbool);
+      messageFieldcontroller.clear();
+    }
   }
 }

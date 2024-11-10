@@ -6,6 +6,7 @@ import 'package:recipe_test/main.dart';
 class SearchTextFormField extends StatelessWidget {
   final String? hinttext;
   final Function iconOnTap;
+  final FocusNode? focusNode;
   final TextEditingController controller;
   final Function(String)? fieldSubmitted;
   final AppValidator? validator;
@@ -18,6 +19,7 @@ class SearchTextFormField extends StatelessWidget {
     this.fieldSubmitted,
     this.validator,
     this.keyboardtype,
+    this.focusNode,
   });
 
   @override
@@ -28,6 +30,7 @@ class SearchTextFormField extends StatelessWidget {
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardtype,
+            focusNode: focusNode,
             onFieldSubmitted: (value) {
               iconOnTap();
             },

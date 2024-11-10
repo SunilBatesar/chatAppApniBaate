@@ -6,6 +6,7 @@ class AppColors {
   AppColors();
   Color primary = const Color(0xffF8C433);
   Color yellowlight = const Color(0xffFEDE76);
+  Color green = const Color(0xff508D69);
   Color bg = const Color.fromARGB(255, 255, 255, 255);
   Color lightblue = const Color(0xffF0F6F9);
   Color black = const Color(0xff010101);

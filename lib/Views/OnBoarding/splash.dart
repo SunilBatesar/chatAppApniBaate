@@ -25,7 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(milliseconds: 100), () async {
       if (userId.isNotEmpty) {
         await userController.getDataUser(userId).then((v) async {
-          await userController.getFriendsData();
           Get.offNamed(RouteName.homeScreen);
         });
       } else {
